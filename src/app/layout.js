@@ -10,7 +10,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es">
       <body>
-        <Navbar /> {/* <--- ESTA LÍNEA ES LA QUE FALTA */}
+        <Navbar />
         {children}
       </body>
     </html>

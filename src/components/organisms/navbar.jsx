@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import styles from '../../styles/navbar.module.css';
 
 export default function Navbar() {
@@ -7,13 +8,20 @@ export default function Navbar() {
         Anti-Infernum
       </div>
       <div className={styles.navLinks}>
-        <div className={styles.link}>Inicio</div>
+        <Link href="/">
+          <div className={styles.link}>Inicio</div>
+        </Link>
         <div className={styles.link}>Incendios</div>
         <div className={styles.link}>Lugares Seguros</div>
         <div className={styles.link}>Alertas</div>
         <button className={styles.loginBtn}>
-          Ingresar
+            Login
         </button>
+        <Link href="/register">
+          <button className={styles.loginBtn}>
+            Regístrate
+          </button>
+        </Link>
       </div>
     </nav>
   );
