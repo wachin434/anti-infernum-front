@@ -13,15 +13,37 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleRegister = () => {
-    const exists = findUserByEmail(email);
+  const isValidEmail = (email) => {
+    const trimmed = email.trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+  };
+
+  const handleRegister = async () => {
+    if (email.trim() === '' || password.trim() === '' || name.trim() === '') {
+      setError('Todos los campos son obligatorios.');
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setError('Ingresa un email válido.');
+      return;
+    }
+
+    let exists;
+    try {
+      exists = await findUserByEmail(email);
+    } catch (error) {
+      console.error(error);
+      setError('No se pudo validar el email. Intenta más tarde.');
+      return;
+    }
 
     if (exists) {
       setError('Este correo ya está registrado. Inicia sesión.');
       return;
     }
 
-    addUser({ name, email, password });
+    await addUser({ nombre: name, email: email, contra: password, fechaRegistro: Date.now() });
     setError('');
     alert('Registro exitoso');
   };
@@ -64,7 +86,7 @@ export default function RegisterPage() {
       <div className={styles.login}>
         <p>Ya tienes una cuenta?</p>
         <button className={styles.loginBtn}>
-            Login
+          Login
         </button>
       </div>
     </div>
