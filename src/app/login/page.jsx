@@ -1,15 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from '../../styles/register.module.css';
-import { useRouter } from 'next/navigation';
-import { addUser, findUserByEmail } from '../../data/users';
-//ahora si que siiiiii ouyeaaaaa 🥵🥵🥵🥵🥵🥵🥵
+import { findUserByEmail, login } from '../../data/users';
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const router = useRouter();
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -20,8 +18,8 @@ export default function RegisterPage() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
   };
 
-  const handleRegister = async () => {
-    if (email.trim() === '' || password.trim() === '' || name.trim() === '') {
+  const handleLogin = async () => {
+    if (email.trim() === '' || password.trim() === '') {
       setError('Todos los campos son obligatorios.');
       return;
     }
@@ -36,33 +34,31 @@ export default function RegisterPage() {
 
     try {
       const exists = await findUserByEmail(email);
-      if (exists) {
-        setError('Este correo ya está registrado. Inicia sesión.');
+      if (!exists) {
+        setError('Este correo no está registrado. Regístrate.');
         return;
       }
 
-      await addUser({ nombre: name, email: email, contra: password, fechaRegistro: Date.now() });
-      router.push('/login');
+      const data = await login(email, password);
+      localStorage.setItem('session', JSON.stringify(data));
+      window.dispatchEvent(new Event('sessionChanged'));
+      router.push('/');
     } catch (error) {
       console.error(error);
-      setError('Ocurrió un error al registrar. Intenta de nuevo.');
+      setError('Ocurrió un error al iniciar sesión. Intenta de nuevo.');
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  
 
   return (
     <div className={styles.addUser}>
-      <h3>Sign Up</h3>
+      <h3>Login</h3>
 
       <form className={styles.addUserForm}>
         <div className={styles.inputGroup}>
-          <label>Nombre:</label>
-          <input
-            type="text"
-            placeholder="Ingresa tu nombre"
-            onChange={(e) => setName(e.target.value)}
-          />
 
           <label>Email:</label>
           <input
@@ -83,22 +79,22 @@ export default function RegisterPage() {
           <button
             type="button"
             className={styles.loginBtn}
-            onClick={handleRegister}
+            onClick={handleLogin}
             disabled={loading}
           >
-            {loading ? 'Registrando...' : 'Registrar'}
+            {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </div>
       </form>
 
       <div className={styles.login}>
-        <p>Ya tienes una cuenta?</p> 
-        {/* ya tienes cam?, ¡Actívala!
-        nooooo guitar xdddd */}
+        <p>No tienes una cuenta?</p>
+        {/* No tienes cam? ¡Comprala!
+        noooo guitar xdddd */}
 
-        <Link href="/login">
+        <Link href="/register">
           <button className={styles.loginBtn}>
-            Login
+            Registrate
           </button>
         </Link>
       </div>

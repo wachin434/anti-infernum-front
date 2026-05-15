@@ -21,3 +21,18 @@ export const findUserByEmail = async (email) => {
   const data = await res.json();
   return Boolean(data);
 };
+
+export const login = async (email, password) => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}api/auth/usuarios/login`, {
+    body: JSON.stringify({ email, contra: password }),
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Error en login 😞😞: ${res.status}`);
+  }
+  const data = await res.json();
+  return data;
+};
