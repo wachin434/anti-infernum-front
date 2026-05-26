@@ -43,6 +43,10 @@
     }
 </script>
 
+<svelte:head>
+    <title>anti-infernum - Gestión de Incendios | Inicio de sesion</title>
+</svelte:head>
+
 <div class="addUser">
     <h3>Login</h3>
 

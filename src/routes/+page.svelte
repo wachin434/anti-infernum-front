@@ -2,6 +2,10 @@
     import Button from "@/components/atoms/button.svelte";
 </script>
 
+<svelte:head>
+    <title>anti-infernum - Gestión de Incendios</title>
+</svelte:head>
+
 <main class="mainContainer">
     <section class="heroSection">
         <div class="alertBadge">Estado: Monitoreo Activo</div>

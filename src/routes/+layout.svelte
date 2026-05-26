@@ -6,7 +6,6 @@
 </script>
 
 <svelte:head>
-    <title>anti-infernum - Gestión de Incendios</title>
     <meta
         name="description"
         content="Plataforma inteligente para la prevención de desastres."
