@@ -2,18 +2,21 @@
   "name": "proj",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "packageManager": "pnpm@11.2.2",
-  "dependencies": {
-    "next": "16.2.6",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
-  },
   "devDependencies": {
-    "babel-plugin-react-compiler": "1.0.0"
+    "@sveltejs/adapter-node": "5.5.4",
+    "@sveltejs/adapter-vercel": "6.3.3",
+    "@sveltejs/kit": "^2.60.1",
+    "@types/node": "^24.12.4",
+    "svelte": "^5.55.8",
+    "svelte-check": "^4.4.8",
+    "typescript": "6.0.3",
+    "vite": "8.0.14"
   }
 }
