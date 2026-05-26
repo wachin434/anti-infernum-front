@@ -91,7 +91,7 @@
         color: var(--secondary-orange);
     }
 
-    .loginBtn {
+    :global(.loginBtn) {
         background-color: var(--primary-red);
         color: white;
         padding: 0.5rem 1.2rem;
@@ -103,7 +103,7 @@
         transition: background 0.3s ease;
     }
 
-    .loginBtn:hover {
+    :global(.loginBtn:hover) {
         background-color: #b71c1c;
     }
 

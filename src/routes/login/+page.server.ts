@@ -1,5 +1,5 @@
 import { login } from "@/data/users";
-import { fail } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 
 export const actions = {
     login: async ({ request }: { request: Request }) => {
@@ -17,7 +17,7 @@ export const actions = {
             return data;
         } catch (error) {
             console.error("Error en login:", error);
-            return fail(400, { error: 'Credenciales inválidas.' });
+            return fail(403, { error: 'Credenciales inválidas.' });
         }
     }
 };
