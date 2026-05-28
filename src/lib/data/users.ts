@@ -1,14 +1,13 @@
-interface User {
+import { API_URL } from "$env/static/private";
+
+interface UserPost {
   id?: number;
   nombre: string;
   email: string;
+  contra: string;
 };
 
-interface UserPost extends User {
-  contra: string;
-}
-
-import { API_URL } from "$env/static/private";
+type User = Omit<UserPost,'contra'>;
 
 export const addUser = async (user: UserPost) => {
   const res = await fetch(`${API_URL}api/auth/usuarios`, {
@@ -21,7 +20,7 @@ export const addUser = async (user: UserPost) => {
   console.log(res);
 };
 
-export const findUserByEmail = async (email: string) => {
+export const findUserByEmail: (email:string) => Promise<boolean> = async (email) => {
   const res = await fetch(`${API_URL}api/auth/usuarios/email/${encodeURIComponent(email)}`);
   if (res.status === 404) {
     return false;
@@ -33,7 +32,7 @@ export const findUserByEmail = async (email: string) => {
   return Boolean(data);
 };
 
-export const login = async (email: string, password: string) => {
+export const login: (email:string,password:string) => Promise<User> = async (email, password) => {
   const res = await fetch(`${API_URL}api/auth/usuarios/login`, {
     body: JSON.stringify({ email, contra: password }),
     method: 'POST',
@@ -45,5 +44,5 @@ export const login = async (email: string, password: string) => {
     throw new Error(`Error en login 😞😞: ${res.status}`);
   }
   const data = await res.json();
-  return data as Promise<User>;
+  return data;
 };
