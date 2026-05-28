@@ -1,4 +1,4 @@
-import { login } from "@/data/users";
+import { login } from "@/lib/data/users";
 import { fail, redirect } from "@sveltejs/kit";
 
 export const actions = {
