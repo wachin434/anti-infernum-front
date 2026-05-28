@@ -1,0 +1,48 @@
+import { API_URL } from "$env/static/private";
+
+interface UserPost {
+  id?: number;
+  nombre: string;
+  email: string;
+  contra: string;
+};
+
+type User = Omit<UserPost,'contra'>;
+
+export const addUser = async (user: UserPost) => {
+  const res = await fetch(`${API_URL}api/auth/usuarios`, {
+    body: JSON.stringify(user),
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+  console.log(res);
+};
+
+export const findUserByEmail: (email:string) => Promise<boolean> = async (email) => {
+  const res = await fetch(`${API_URL}api/auth/usuarios/email/${encodeURIComponent(email)}`);
+  if (res.status === 404) {
+    return false;
+  }
+  if (!res.ok) {
+    throw new Error(`Error buscando usuario: ${res.status}`);
+  }
+  const data = await res.json();
+  return Boolean(data);
+};
+
+export const login: (email:string,password:string) => Promise<User> = async (email, password) => {
+  const res = await fetch(`${API_URL}api/auth/usuarios/login`, {
+    body: JSON.stringify({ email, contra: password }),
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Error en login 😞😞: ${res.status}`);
+  }
+  const data = await res.json();
+  return data;
+};
