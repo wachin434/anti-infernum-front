@@ -6,7 +6,6 @@
 
     let loading = $state(false);
     let error = $state("");
-    let contraseniaSuperSegura = $state("");
 
     function handleEnhance() {
         error = "";
@@ -15,18 +14,9 @@
         return async ({ result, update }: any) => {
             loading = false;
 
-            if (result?.type === "success" && result.data) {
-                try {
-                    localStorage.setItem(
-                        "session",
-                        JSON.stringify(result.data),
-                    );
-                } catch (err) {
-                    console.error("Error guardando sesión:", err);
-                }
-
-                goto("/");
-                window.dispatchEvent(new Event("sessionChanged"));
+            if (result?.type === "success") {
+                alert("Usuario registrado exitosamente. Redirigiendo a login...");
+                await goto("/login");
                 return;
             }
 
@@ -60,7 +50,6 @@
         <div class="inputGroup">
             <label for="name">Nombre:</label>
             <input
-                id="name"
                 name="name"
                 type="name"
                 placeholder="Ingresa tu nombre"
@@ -68,7 +57,6 @@
 
             <label for="email">Email:</label>
             <input
-                id="email"
                 name="email"
                 type="email"
                 placeholder="Ingresa tu email"
@@ -76,19 +64,16 @@
 
             <label for="password">Contrasena:</label>
             <input
-                id="password"
                 name="password"
                 type="password"
                 placeholder="Ingresa una contrasena super segura 👌"
             />
 
-            <label for="password">Confirma la contrasena:</label>
+            <label for="confirmPassword">Confirma la contrasena:</label>
             <input
-                id="password"
-                name="password"
+                name="confirmPassword"
                 type="password"
                 placeholder="Confirma tu contrasena super segura 👌"
-                bind:value={contraseniaSuperSegura}
             />
 
             {#if error}
@@ -96,7 +81,7 @@
             {/if}
 
             <Button type="submit" class="loginBtn" disabled={loading}>
-                {loading ? "Ingresando..." : "Ingresar"}
+                {loading ? "Registrando..." : "Registrar"}
             </Button>
         </div>
     </form>

@@ -5,6 +5,7 @@ interface UserPost {
   nombre: string;
   email: string;
   contra: string;
+  fechaRegistro: number;
 };
 
 type User = Omit<UserPost,'contra'>;
