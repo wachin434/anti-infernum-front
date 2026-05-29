@@ -1,5 +1,5 @@
 import { login } from "@/lib/data/users";
-import { fail, redirect } from "@sveltejs/kit";
+import { fail } from "@sveltejs/kit";
 
 export const actions = {
     login: async ({ request }: { request: Request }) => {
