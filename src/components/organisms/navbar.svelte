@@ -1,6 +1,7 @@
 <script lang="ts">
     import Button from "@/components/atoms/button.svelte";
     import "@/styles/navbar.css";
+    import icon from "$lib/assets/antiInfernumLogo.webp";
 
     let isLoggedIn = $state(false);
 
@@ -26,9 +27,13 @@
 </script>
 
 <nav class="navbar">
+<div class="navLeft">
+    <img  class="icon" src={icon} alt="Logo" />
     <a class="logo" href="/">
         <div>Anti-Infernum</div>
     </a>
+</div>
+
 
     <div class="navLinks">
         <div class="link">Incendios</div>
