@@ -1,9 +1,14 @@
 import { login } from "@/lib/data/users";
 import { userCredentials } from "@/lib/schemas/usercredentials";
-import { fail } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import type { Actions } from "./$types";
 
 export const actions: Actions = {
+    logout: async ({ cookies }) => {
+        cookies.delete("session_token", { path: "/" });
+
+        throw redirect(303, "/");
+    },
     login: async ({ request, cookies }) => {
         const data = await request.formData();
         const email = data.get("email") as string;
@@ -24,10 +29,6 @@ export const actions: Actions = {
         try {
             let data = await login(user.data);
             if (data && data.token) {
-                /**
-                 * Guarda el token en una cookie segura.
-                 * El flag httpOnly: true bloquea el acceso desde JavaScript en el navegador.
-                 */
                 cookies.set("session_token", data.token, {
                     path: "/",
                     httpOnly: true,
