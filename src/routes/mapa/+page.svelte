@@ -1,13 +1,24 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
+  import "@/styles/mapa.css";
+  //importación pa los iconos .svg q puse ouyeaa 🥵
+  import fireMarkerIconUrl from "$lib/assets/fire-svgrepo-com.svg";
+  import zoomInIconUrl from "$lib/assets/zoom-in-1-svgrepo-com.svg";
+  import zoomOutIconUrl from "$lib/assets/zoom-out-1-svgrepo-com.svg";
+  import centerIconUrl from "$lib/assets/location-target-svgrepo-com.svg";
+  import currentLocationIconUrl from "$lib/assets/location-define-svgrepo-com.svg";
+
+  
 
   let map = $state(null);
   let mapContainer = $state(null);
-  let zoom = 17; //el zoom default 
+  let zoom = 17; //el zoom default
 
+  //después hay que cambiar esto por la ubicación del usuario esosi
   const centroInicial = [-33.5990313, -70.8738986];
   const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 
+  //pon auí tu array de marcadores de prueba super seguro 👀👀 wea mala jashdha
   const misMarcadores = [
     {
       id: 1,
@@ -29,6 +40,8 @@
     map?.setView(centroInicial, zoom);
   }
 
+  //acá tuve que hacer algo exótico para que funcionara la libreria del mapa wn
+  //pq resulta que el leaflet se pone mañoso con el ssr jsdahj
   onMount(async () => {
     const L = await import("leaflet");
 
@@ -44,11 +57,19 @@
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
+    //se pone mañoso si intento poner el url del icono pelao, asi que quedó esta wea acá xd
+    const fireMarkerIcon = L.icon({
+      iconUrl: fireMarkerIconUrl,
+      iconSize: [40, 40],
+      iconAnchor: [20, 40],
+      popupAnchor: [0, -40],
+    });
+
     misMarcadores.forEach((marcador) => {
-      L.marker(marcador.posicion)
+      L.marker(marcador.posicion, { icon: fireMarkerIcon })
         .addTo(map)
         .bindPopup(
-          `<strong>${marcador.titulo}</strong><br>${marcador.descripcion}`
+          `<strong>${marcador.titulo}</strong><br>${marcador.descripcion}`,
         );
     });
 
@@ -73,10 +94,14 @@
 
 <div class="contenedor-mapa-seguro">
   <div class="map-controls">
-    <button type="button" class="control-btn" on:click={zoomIn}>+</button>
-    <button type="button" class="control-btn" on:click={zoomOut}>−</button>
-    <button type="button" class="control-btn center-btn" on:click={resetCenter}>
-      Centrar
+    <button type="button" class="control-btn" on:click={zoomIn}>
+      <img src={zoomInIconUrl} alt="Zoom In" />
+    </button>
+    <button type="button" class="control-btn" on:click={zoomOut}>
+      <img src={zoomOutIconUrl} alt="Zoom Out" />
+    </button>
+    <button type="button" class="control-btn" on:click={resetCenter}>
+      <img src={centerIconUrl} alt="Centrar" />
     </button>
   </div>
 
@@ -87,67 +112,3 @@
   </div>
 </div>
 
-<style>
-  .contenedor-mapa-seguro {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    z-index: 0;
-  }
-
-  .leaflet-map {
-    width: 100%;
-    height: 100%;
-    position: relative;
-  }
-
-  .map-controls {
-    position: absolute;
-    top: 8rem;
-    right: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    z-index: 1100;
-  }
-
-  .control-btn {
-    width: 3rem;
-    height: 3rem;
-    border: none;
-    border-radius: 0.75rem;
-    background: rgba(26, 26, 26, 0.85);
-    color: #fff;
-    font-size: 1.2rem;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
-    transition: transform 0.15s ease, background 0.15s ease;
-  }
-
-  .control-btn:hover {
-    transform: translateY(-1px);
-    background: rgba(40, 40, 40, 0.95);
-  }
-
-  .center-btn {
-    width: auto;
-    min-width: 4.5rem;
-    padding: 0 1rem;
-    font-size: 0.95rem;
-  }
-
-  .map-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    background: rgba(0, 0, 0, 0.35);
-    font-size: 1rem;
-    font-weight: 700;
-  }
-</style>
