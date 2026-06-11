@@ -34,6 +34,17 @@
   color: var(--text-light);
   font-size: 0.95rem;
   transition: border 0.3s ease, background 0.3s ease;
+
+  &.error-indicator {
+    border-color: rgba(255, 0, 0, 0.5);
+    border-width: 2px;
+
+    &:hover,
+    &:active,
+    &:focus {
+      border-width: 2px;
+    }
+  }
 }
 
 .addUserForm .inputGroup input:focus {

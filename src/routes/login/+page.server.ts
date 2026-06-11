@@ -1,20 +1,44 @@
 import { login } from "@/lib/data/users";
+import { userCredentials } from "@/lib/schemas/usercredentials";
 import { fail } from "@sveltejs/kit";
+import type { Actions } from "./$types";
 
-export const actions = {
-    login: async ({ request }: { request: Request }) => {
-        const formData = await request.formData();
-        const email = formData.get("email") as string;
-        const password = formData.get("password") as string;
+export const actions: Actions = {
+    login: async ({ request, cookies }) => {
+        const data = await request.formData();
+        const email = data.get("email") as string;
+        const password = data.get("password") as string;
 
-        console.log("Posteando: ", { email: email.trim(), password: password.trim() });
-
-        if(!email.trim() || !password.trim()) {
-            return fail(400, { error: 'Email y contraseña son obligatorios.' });
+        const user = userCredentials.safeParse({ email, contra: password });
+        if (!user.success) {
+            const fieldErrors = user.error.issues.reduce((acc, issue) => {
+                const path = issue.path[0] as string;
+                acc[path] = issue.message;
+                return acc;
+            }, {} as Record<string, string>);
+            return fail(400, { 
+                success: false,
+                errors: fieldErrors,
+            });
         }
         try {
-            let data = await login(email.trim(), password.trim());
-            return data;
+            let data = await login(user.data);
+            if (data && data.token) {
+                /**
+                 * Guarda el token en una cookie segura.
+                 * El flag httpOnly: true bloquea el acceso desde JavaScript en el navegador.
+                 */
+                cookies.set("session_token", data.token, {
+                    path: "/",
+                    httpOnly: true,
+                    sameSite: "strict",
+                    secure: true,
+                    maxAge: 60 * 60 * 24
+                });
+                return { success: true };
+            } else {
+                return fail(400, { error: "El backend no devolvió un token válido." });
+            }
         } catch (error) {
             console.error("Error en login:", error);
             return fail(403, { error: 'Credenciales inválidas.' });

@@ -3,40 +3,30 @@
     import { goto } from "$app/navigation";
     import Button from "@/components/atoms/button.svelte";
     import "@/styles/register.css";
+    import type { SubmitFunction } from "./$types";
 
     let loading = $state(false);
-    let error = $state("");
-
-    function handleEnhance() {
-        error = "";
+    let { form } = $props();
+    function handleEnhance(): ReturnType<SubmitFunction> {
         loading = true;
 
-        return async ({ result, update }: any) => {
+        return async ({ result, update }) => {
             loading = false;
 
             if (result?.type === "success" && result.data) {
-                try {
-                    localStorage.setItem(
-                        "session",
-                        JSON.stringify(result.data),
-                    );
-                } catch (err) {
-                    console.error("Error guardando sesión:", err);
-                }
-
                 goto("/");
                 window.dispatchEvent(new Event("sessionChanged"));
                 return;
             }
 
             if (result?.type === "failure") {
-                error = result?.data?.error ?? "Credenciales inválidas.";
+                console.log(result);
                 await update?.();
                 return;
             }
 
             if (result?.type === "error") {
-                error = "Error de login. Intenta de nuevo.";
+                console.error("Error crítico en el servidor.");
                 await update?.();
             }
         };
@@ -59,22 +49,27 @@
         <div class="inputGroup">
             <label for="email">Email:</label>
             <input
+                class={form?.errors?.email ? "error-indicator" : ""}
                 id="email"
                 name="email"
                 type="email"
                 placeholder="Ingresa tu email"
             />
+            {#if form?.errors?.email}
+                <p class="error">{form.errors.email}</p>
+            {/if}
 
             <label for="password">Contrasena:</label>
             <input
+                class={form?.errors?.contra ? "error-indicator" : ""}
                 id="password"
                 name="password"
                 type="password"
                 placeholder="Ingresa tu contrasena super segura 👌"
+                autocomplete="current-password"
             />
-
-            {#if error}
-                <p class="error">{error}</p>
+            {#if form?.errors?.contra}
+                <p class="error">{form.errors.contra}</p>
             {/if}
 
             <Button type="submit" class="loginBtn" disabled={loading}>

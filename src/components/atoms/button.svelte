@@ -2,11 +2,11 @@
 
 <script lang="ts">
     import type { Snippet } from "svelte";
-    import type { HTMLButtonAttributes } from "svelte/elements";
+    import type { SvelteHTMLElements } from "svelte/elements";
     /**
      * Props para el boton.
      */
-    interface Props extends HTMLButtonAttributes {
+    type Props = SvelteHTMLElements["button"] & {
         /**
          * Clases CSS para el boton.
          */
@@ -15,7 +15,7 @@
          * Contenido interno del boton.
          */
         children: Snippet;
-    }
+    };
     let { class: className, children, ...rest }: Props = $props();
 </script>
 
