@@ -36,7 +36,9 @@
 
 
     <div class="navLinks">
-        <div class="link">Incendios</div>
+        <a href="/mapa">
+            <div class="link">Mapa de Incendios</div>
+        </a>
         <div class="link">Lugares Seguros</div>
         <div class="link">Alertas</div>
 
