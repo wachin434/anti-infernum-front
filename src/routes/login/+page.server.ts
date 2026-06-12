@@ -1,7 +1,7 @@
 import { login } from "@/lib/data/users";
 import { userCredentials } from "@/lib/schemas/usercredentials";
 import { fail, redirect } from "@sveltejs/kit";
-import type { Actions } from "./$types";
+import type { Actions, PageServerLoad } from "./$types";
 
 export const actions: Actions = {
     logout: async ({ cookies }) => {
@@ -44,5 +44,11 @@ export const actions: Actions = {
             console.error("Error en login:", error);
             return fail(403, { error: 'Credenciales inválidas.' });
         }
+    }
+};
+
+export const load: PageServerLoad = async ({parent}) => {
+    if((await parent()).isAuthenticated) {
+        throw redirect(303, "/");
     }
 };

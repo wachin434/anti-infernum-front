@@ -2,6 +2,7 @@ import {addUser, findUserByEmail} from "$lib/data/users";
 import { userPost } from "@/lib/schemas/userpost";
 import { fail, redirect } from "@sveltejs/kit";
 import { z } from "zod";
+import type { PageServerLoad } from "./$types";
 
 const userRegister = userPost
     .extend({
@@ -42,5 +43,11 @@ export const actions = {
             console.error("Error al registrar usuario:", error);
             return fail(403, { error: 'Error al registrar usuario.' });
         }
+    }
+};
+
+export const load: PageServerLoad = async ({parent}) => {
+    if((await parent()).isAuthenticated) {
+        throw redirect(303, "/");
     }
 };
