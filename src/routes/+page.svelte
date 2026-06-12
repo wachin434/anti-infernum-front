@@ -8,23 +8,10 @@
 
 <main class="mainContainer">
     <section class="heroSection">
-        <div class="alertBadge">Estado: Monitoreo Activo</div>
 
         <h1 class="title">
             anti infernum <br />
         </h1>
-
-        <p class="subtitle">
-            Plataforma inteligente para la gestion y prevencion de incendios
-            forestales y urbanos.
-        </p>
-
-        <div style="display: flex; gap: 1rem; justify-content: center;">
-            <Button class="primaryButton">Reportar Incendio</Button>
-            <Button class="primaryButton" style="background: #333;">
-                Ver Mapa de Riesgo
-            </Button>
-        </div>
     </section>
 </main>
 
