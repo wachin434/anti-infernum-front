@@ -50,6 +50,7 @@
         text-transform: uppercase;
         cursor: pointer;
         transition: background 0.3s ease;
+
     }
 
     .loginBtn:hover {
@@ -121,4 +122,12 @@
 .navLeft {
     display: flex;
     align-items: center;
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(45deg, #ff5f6d, #ffc371);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: -1px;
 }
