@@ -6,6 +6,7 @@ import type { Actions, PageServerLoad } from "./$types";
 export const actions: Actions = {
     logout: async ({ cookies }) => {
         cookies.delete("session_token", { path: "/" });
+        cookies.delete("user_id", { path: "/" });
 
         throw redirect(303, "/");
     },
