@@ -1,6 +1,6 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
-    import { goto } from "$app/navigation";
+    import { goto, invalidateAll } from "$app/navigation";
     import Button from "@/components/atoms/button.svelte";
     import "@/styles/register.css";
     import type { SubmitFunction } from "./$types";
@@ -14,8 +14,8 @@
             loading = false;
 
             if (result?.type === "success" && result.data) {
+                await invalidateAll();
                 goto("/");
-                window.dispatchEvent(new Event("sessionChanged"));
                 return;
             }
 

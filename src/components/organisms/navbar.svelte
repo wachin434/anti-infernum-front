@@ -3,6 +3,8 @@
     import "@/styles/navbar.css";
     import icon from "$lib/assets/antiInfernumLogo.webp";
     import { page } from "$app/state";
+    import { enhance } from "$app/forms";
+    import { invalidateAll } from "$app/navigation";
 </script>
 
 <nav class="navbar">
@@ -28,7 +30,19 @@
                 <div class="loginBtn">Registrate</div>
             </a>
         {:else}
-            <form method="POST" action="/login?/logout">
+            <form 
+                method="POST" 
+                action="/login?/logout"
+                use:enhance={() => {
+                    return async ({ result, update }) => {
+                        await update();
+
+                        if (result.type === "success" || result.type === "redirect") {
+                            await invalidateAll();
+                        }
+                    };
+                }}
+            >
                 <Button class="loginBtn" type="submit">Cerrar Sesion</Button>
             </form>
         {/if}
