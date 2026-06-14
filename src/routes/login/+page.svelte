@@ -14,6 +14,7 @@
             loading = false;
 
             if (result?.type === "success" && result.data) {
+                localStorage.setItem("user-id", result.data.user.id);
                 await invalidateAll();
                 goto("/");
                 return;

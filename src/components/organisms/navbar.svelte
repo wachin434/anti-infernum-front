@@ -38,6 +38,7 @@
                         await update();
 
                         if (result.type === "success" || result.type === "redirect") {
+                             localStorage.removeItem("user-id");
                             await invalidateAll();
                         }
                     };

@@ -37,15 +37,18 @@ export const actions: Actions = {
                     secure: true,
                     maxAge: 60 * 60 * 24
                 });
-                let email = await findUserByEmail(user.data.email, data.token);
-                cookies.set("user_idl", email.id, {
+                let apiUser = await findUserByEmail(user.data.email, data.token);
+                cookies.set("user_id", apiUser.id, {
                     path: "/",
                     httpOnly: true,
                     sameSite: "strict",
                     secure: true,
                     maxAge: 60 * 60 * 24
                 });
-                return { success: true };
+                return { 
+            success: true, 
+            user: apiUser 
+        };
             } else {
                 return fail(400, { error: "El backend no devolvió un token válido." });
             }
