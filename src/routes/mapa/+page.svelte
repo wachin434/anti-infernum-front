@@ -4,39 +4,35 @@
   import { Map, TileLayer, Marker, Popup } from "sveaflet";
   import type { LatLngTuple } from "leaflet";
 
-  // Importación de iconos .svg
   import fireMarkerIconUrl from "$lib/assets/fire-svgrepo-com.svg";
   import zoomInIconUrl from "$lib/assets/zoom-in-1-svgrepo-com.svg";
   import zoomOutIconUrl from "$lib/assets/zoom-out-1-svgrepo-com.svg";
   import centerIconUrl from "$lib/assets/location-target-svgrepo-com.svg";
   import currentLocationIconUrl from "$lib/assets/location-define-svgrepo-com.svg";
 
-  // Estados usando las Runas de Svelte 5
+  //ya no puedo más hermanos, la wea está bien, pero mi salud mental no xd
+  //por lo que ya no voy a poner niun comentario
+  //cualquier cosa que no estiendan, preguntenme y era
+
   let mapRef = $state<any>(null);
   let isMounted = $state(false);
   let zoom = $state(17);
 
-  // Contenedor del mapa para capturar los eventos del dedo
   let contenedorMapaNode = $state<HTMLDivElement | null>(null);
 
-  // Coordenadas fijas solo para el arranque inicial del componente mapa
   const centroInicial: LatLngTuple = [-33.5990313, -70.8738986];
 
-  // Runas para la posición del usuario en tiempo real
   let posicionUsuario = $state<LatLngTuple>([-33.5990313, -70.8738986]);
   let centroBase = $state<LatLngTuple>([-33.5990313, -70.8738986]);
   let tieneUbicacionReal = $state(false);
 
-  // Bandera para controlar si la cámara debe seguir al usuario automáticamente
   let centradoAutomatico = $state(true);
 
-  // ID para controlar y apagar el rastro del GPS
   let watchId: number | null = null;
 
   const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
   const attributionText = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
-  // Marcadores de incendios estables
   const misMarcadores: { id: number; posicion: LatLngTuple; titulo: string; descripcion: string }[] = [
     {
       id: 1,
@@ -49,7 +45,6 @@
   let fireMarkerIcon = $state<any>(null);
   let userLocationIcon = $state<any>(null);
 
-  // Función para solicitar y espiar la ubicación en tiempo real
   function obtenerUbicacionTiempoReal() {
     if (!navigator.geolocation) {
       console.error("Tu navegador no soporta geolocalización, hno");
@@ -64,7 +59,6 @@
         centroBase = [latitude, longitude]; 
         tieneUbicacionReal = true;
 
-        // SOLO movemos la cámara de forma obligatoria si el auto-centrado está activo
         if (mapRef && centradoAutomatico) {
           mapRef.setView(posicionUsuario, mapRef.getZoom());
         }
@@ -83,7 +77,6 @@
     );
   }
 
-  // Funciones de control de los botones flotantes
   function zoomIn() {
     if (mapRef) {
       mapRef.zoomIn();
@@ -100,13 +93,12 @@
 
   function resetCenter() {
     if (mapRef) {
-      centradoAutomatico = true; // Reactivamos el candado de seguimiento continuo
+      centradoAutomatico = true;
       mapRef.setView(centroBase, 17);
       zoom = 17;
     }
   }
 
-  // Función que apaga el auto-centrado si el usuario toca o arrastra físicamente el mapa
   function desactivarSeguimiento() {
     if (centradoAutomatico) {
       centradoAutomatico = false;
@@ -134,7 +126,6 @@
     isMounted = true;
     obtenerUbicacionTiempoReal();
 
-    // Vinculamos los eventos nativos de interacción directamente al elemento contenedor
     if (contenedorMapaNode) {
       contenedorMapaNode.addEventListener("touchstart", desactivarSeguimiento, { passive: true });
       contenedorMapaNode.addEventListener("mousedown", desactivarSeguimiento, { passive: true });
@@ -146,7 +137,7 @@
     if (watchId !== null) {
       navigator.geolocation.clearWatch(watchId);
     }
-    // Limpieza de eventos
+
     if (contenedorMapaNode) {
       contenedorMapaNode.removeEventListener("touchstart", desactivarSeguimiento);
       contenedorMapaNode.removeEventListener("mousedown", desactivarSeguimiento);
