@@ -1,23 +1,66 @@
-import { login } from "@/lib/data/users";
-import { fail } from "@sveltejs/kit";
+import { findUserByEmail, login } from "@/lib/data/users";
+import { userCredentials } from "@/lib/schemas/usercredentials";
+import { fail, redirect } from "@sveltejs/kit";
+import type { Actions, PageServerLoad } from "./$types";
 
-export const actions = {
-    login: async ({ request }: { request: Request }) => {
-        const formData = await request.formData();
-        const email = formData.get("email") as string;
-        const password = formData.get("password") as string;
+export const actions: Actions = {
+    logout: async ({ cookies }) => {
+        cookies.delete("session_token", { path: "/" });
+        cookies.delete("user_id", { path: "/" });
 
-        console.log("Posteando: ", { email: email.trim(), password: password.trim() });
+        throw redirect(303, "/");
+    },
+    login: async ({ request, cookies }) => {
+        const data = await request.formData();
+        const email = data.get("email") as string;
+        const password = data.get("password") as string;
 
-        if(!email.trim() || !password.trim()) {
-            return fail(400, { error: 'Email y contraseña son obligatorios.' });
+        const user = userCredentials.safeParse({ email, contra: password });
+        if (!user.success) {
+            const fieldErrors = user.error.issues.reduce((acc, issue) => {
+                const path = issue.path[0] as string;
+                acc[path] = issue.message;
+                return acc;
+            }, {} as Record<string, string>);
+            return fail(400, { 
+                success: false,
+                errors: fieldErrors,
+            });
         }
         try {
-            let data = await login(email.trim(), password.trim());
-            return data;
+            let data = await login(user.data);
+            if (data && data.token) {
+                cookies.set("session_token", data.token, {
+                    path: "/",
+                    httpOnly: true,
+                    sameSite: "strict",
+                    secure: true,
+                    maxAge: 60 * 60 * 24
+                });
+                let apiUser = await findUserByEmail(user.data.email, data.token);
+                cookies.set("user_id", apiUser.id, {
+                    path: "/",
+                    httpOnly: true,
+                    sameSite: "strict",
+                    secure: true,
+                    maxAge: 60 * 60 * 24
+                });
+                return { 
+            success: true, 
+            user: apiUser 
+        };
+            } else {
+                return fail(400, { error: "El backend no devolvió un token válido." });
+            }
         } catch (error) {
             console.error("Error en login:", error);
             return fail(403, { error: 'Credenciales inválidas.' });
         }
+    }
+};
+
+export const load: PageServerLoad = async ({parent}) => {
+    if((await parent()).isAuthenticated) {
+        throw redirect(303, "/");
     }
 };

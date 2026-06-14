@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
@@ -1251,6 +1254,9 @@ packages:
   zimmerframe@1.1.4:
     resolution: {integrity: sha512-B58NGBEoc8Y9MWWCQGl/gq9xBCe4IiKM0a2x7GZdQKOW5Exr8S1W24J6OgM1njK8xCRGvAJIL/MxXHf6SkmQKQ==}
 
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+
 snapshots:
 
   '@algolia/abtesting@1.19.0':
@@ -2308,3 +2314,5 @@ snapshots:
   yallist@5.0.0: {}
 
   zimmerframe@1.1.4: {}
+
+  zod@4.4.3: {}
