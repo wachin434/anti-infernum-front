@@ -1,4 +1,4 @@
-import { login } from "@/lib/data/users";
+import { findUserByEmail, login } from "@/lib/data/users";
 import { userCredentials } from "@/lib/schemas/usercredentials";
 import { fail, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
@@ -30,6 +30,14 @@ export const actions: Actions = {
             let data = await login(user.data);
             if (data && data.token) {
                 cookies.set("session_token", data.token, {
+                    path: "/",
+                    httpOnly: true,
+                    sameSite: "strict",
+                    secure: true,
+                    maxAge: 60 * 60 * 24
+                });
+                let email = await findUserByEmail(user.data.email, data.token);
+                cookies.set("user_idl", email.id, {
                     path: "/",
                     httpOnly: true,
                     sameSite: "strict",
