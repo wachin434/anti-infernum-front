@@ -2,7 +2,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1rem 2rem;
+        padding: 0.8rem 1.2rem;
         background-color: rgba(26, 26, 26, 0.9);
         /* Basado en tu --dark-bg */
         backdrop-filter: blur(10px);
@@ -15,7 +15,7 @@
 
     .logo {
         font-weight: 800;
-        font-size: 1.4rem;
+        font-size: 1.15rem;
         color: var(--text-light);
         letter-spacing: 1px;
         text-transform: uppercase;
@@ -114,20 +114,20 @@
         }
     }
 .icon {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     margin-right: 10px;
 }
 
 .navLeft {
     display: flex;
     align-items: center;
-    font-size: 3.5rem;
+    font-size: 3rem;
     font-weight: 800;
     background: linear-gradient(45deg, #ff5f6d, #ffc371);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
     text-transform: uppercase;
     letter-spacing: -1px;
 }
