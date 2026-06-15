@@ -1,18 +1,20 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
+  import { onMount, onDestroy, tick } from "svelte";
   import "@/styles/mapa.css";
   import { Map, TileLayer, Marker, Popup } from "sveaflet";
   import type { LatLngTuple } from "leaflet";
+  import type { ReporteMarcador } from "$lib/data/reportes";
+  import { obtenerReportesApi, enviarReporteApi } from "$lib/data/reportes";
+  import ReportForm from "@/components/organisms/report-form.svelte";
 
   import fireMarkerIconUrl from "$lib/assets/fire-svgrepo-com.svg";
   import zoomInIconUrl from "$lib/assets/zoom-in-1-svgrepo-com.svg";
   import zoomOutIconUrl from "$lib/assets/zoom-out-1-svgrepo-com.svg";
   import centerIconUrl from "$lib/assets/location-target-svgrepo-com.svg";
   import currentLocationIconUrl from "$lib/assets/location-define-svgrepo-com.svg";
+  import mapPinIconUrl from "$lib/assets/map-pin-svgrepo-com.svg";
 
-  //ya no puedo más hermanos, la wea está bien, pero mi salud mental no xd
-  //por lo que ya no voy a poner niun comentario
-  //cualquier cosa que no estiendan, preguntenme y era
+  let { data } = $props();
 
   let mapRef = $state<any>(null);
   let isMounted = $state(false);
@@ -28,22 +30,43 @@
 
   let centradoAutomatico = $state(true);
 
-  let watchId: number | null = null;
+  let reportes = $state<ReporteMarcador[]>([]);
+  let reportesError = $state<string | null>(null);
+  let reportesLoading = $state(false);
+  let reportesPollId= $state<number | null>(null);
+  let watchId= $state<number | null>(null);
+  let reportFormOpen = $state(false);
+  let selectingLocation = $state(false);
+  let selectedLocation = $state<LatLngTuple | null>(null);
+
+  const REPORTES_API_URL = "https://anti-infernum-report-service.onrender.com/api/reportes";
+  const POLL_INTERVAL_MS = 15000;
 
   const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
   const attributionText = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
-  const misMarcadores: { id: number; posicion: LatLngTuple; titulo: string; descripcion: string }[] = [
-    {
-      id: 1,
-      posicion: [-33.5990916, -70.8731771],
-      titulo: "Incendio en Pastelería Kaiser",
-      descripcion: "Ayuda loko, se quemaron 3 tortas y una watona",
-    },
-  ];
-
   let fireMarkerIcon = $state<any>(null);
   let userLocationIcon = $state<any>(null);
+  let mapPinIcon = $state<any>(null);
+
+  async function cargarReportes() {
+    reportesLoading = true;
+    reportesError = null;
+
+    try {
+      reportes = await obtenerReportesApi(REPORTES_API_URL);
+    } catch (error) {
+      reportes = [];
+      reportesError = error instanceof Error ? error.message : "Error desconocido al cargar reportes.";
+    } finally {
+      reportesLoading = false;
+    }
+  }
+
+  function iniciarPollingReportes() {
+    cargarReportes();
+    reportesPollId = window.setInterval(cargarReportes, POLL_INTERVAL_MS);
+  }
 
   function obtenerUbicacionTiempoReal() {
     if (!navigator.geolocation) {
@@ -99,10 +122,68 @@
     }
   }
 
+  function abrirFormularioReporte() {
+    if (!data?.isAuthenticated) {
+      alert("Usted debe estar registrado para hacer un reporte");
+      return;
+    }
+
+    reportFormOpen = true;
+    selectingLocation = false;
+    selectedLocation = null;
+  }
+
+  function handleMapClick(event: any) {
+    if (!selectingLocation) {
+      return;
+    }
+
+    const latlng = event?.detail?.latlng ?? event?.latlng;
+    if (!latlng || typeof latlng.lat !== "number" || typeof latlng.lng !== "number") {
+      return;
+    }
+
+    selectedLocation = [latlng.lat, latlng.lng];
+  }
+
+  function cerrarFormularioReporte() {
+    reportFormOpen = false;
+    selectingLocation = false;
+    selectedLocation = null;
+  }
+
+  function activarSeleccionUbicacion() {
+    reportFormOpen = false;
+    selectingLocation = true;
+    selectedLocation = null;
+  }
+
+  function confirmarUbicacion() {
+    if (!selectedLocation) {
+      return;
+    }
+    reportFormOpen = true;
+    selectingLocation = false;
+  }
+
+  async function enviarReporte(event: CustomEvent) {
+    const { titulo, descripcion, latitud, longitud } = event.detail;
+
+    try {
+      await enviarReporteApi(REPORTES_API_URL, { titulo, descripcion, latitud, longitud });
+      reportFormOpen = false;
+      selectedLocation = null;
+      await cargarReportes();
+      alert("Reporte enviado correctamente.");
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "No se pudo enviar el reporte. Intente nuevamente.");
+    }
+  }
+
   function desactivarSeguimiento() {
     if (centradoAutomatico) {
       centradoAutomatico = false;
-      console.log("Seguimiento desactivado por interacción física del usuario.");
     }
   }
 
@@ -123,8 +204,25 @@
       popupAnchor: [0, -15],
     });
 
+    mapPinIcon = L.icon({
+      iconUrl: mapPinIconUrl,
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -28],
+    });
+
+    if (data?.reportes?.length) {
+      reportes = data.reportes;
+    }
+
     isMounted = true;
     obtenerUbicacionTiempoReal();
+    iniciarPollingReportes();
+
+    await tick();
+    if (mapRef && typeof mapRef.on === "function") {
+      mapRef.on("click", handleMapClick);
+    }
 
     if (contenedorMapaNode) {
       contenedorMapaNode.addEventListener("touchstart", desactivarSeguimiento, { passive: true });
@@ -136,6 +234,10 @@
   onDestroy(() => {
     if (watchId !== null) {
       navigator.geolocation.clearWatch(watchId);
+    }
+
+    if (reportesPollId !== null) {
+      clearInterval(reportesPollId);
     }
 
     if (contenedorMapaNode) {
@@ -156,7 +258,7 @@
 </svelte:head>
 
 <div class="contenedor-mapa-seguro">
-  <div class="map-controls">
+  <div class="map-controls-left">
     <button type="button" class="control-btn" onclick={zoomIn}>
       <img src={zoomInIconUrl} alt="Zoom In" />
     </button>
@@ -167,11 +269,24 @@
       <img src={centerIconUrl} alt="Centrar" />
     </button>
   </div>
+  {#if !selectingLocation}
+    <div class="report-button-container">
+      <button type="button" class="report-control-btn" onclick={abrirFormularioReporte}>
+        Reportar incendio
+      </button>
+    </div>
+  {/if}
+  {#if selectingLocation}
+    <div class="selection-mode-badge">
+      <strong>Modo selección de ubicación</strong>
+      <span>Toca el mapa para elegir el lugar del incendio.</span>
+    </div>
+  {/if}
 
   <div class="leaflet-map" bind:this={contenedorMapaNode}>
     {#if isMounted}
-      <Map 
-        options={{ center: centroInicial, zoom: zoom, zoomControl: false }} 
+      <Map
+        options={{ center: centroInicial, zoom, zoomControl: false }}
         bind:instance={mapRef}
       >
         <TileLayer url={tileUrl} options={{ maxZoom: 19, attribution: attributionText }} />
@@ -185,17 +300,78 @@
         {/if}
 
         {#if fireMarkerIcon}
-          {#each misMarcadores as marcador (marcador.id)}
-            <Marker latLng={marcador.posicion} options={{ icon: fireMarkerIcon }}>
+          {#if reportes.length > 0}
+            {#each reportes as reporte (reporte.id)}
+              <Marker latLng={reporte.posicion} options={{ icon: fireMarkerIcon }}>
+                <Popup>
+                  <strong>{reporte.titulo}</strong><br />{reporte.descripcion}
+                </Popup>
+              </Marker>
+            {/each}
+          {:else}
+            <Marker latLng={[-33.5990916, -70.8731771]} options={{ icon: fireMarkerIcon }}>
               <Popup>
-                <strong>{marcador.titulo}</strong><br>{marcador.descripcion}
+                <strong>Incendio de ejemplo</strong><br />Esperando datos de la API...
               </Popup>
             </Marker>
-          {/each}
+          {/if}
+
+          {#if selectingLocation && selectedLocation}
+            <Marker latLng={selectedLocation} options={{ icon: mapPinIcon }}>
+              <Popup>
+                <div class="selection-popup">
+                  <strong>Ubicación seleccionada</strong>
+                  <p>Presiona el botón de confirmación en el panel inferior.</p>
+                </div>
+              </Popup>
+            </Marker>
+          {/if}
         {/if}
       </Map>
+
+      {#if selectingLocation}
+        <div class="location-selection-overlay">
+          <div class="location-selection-card">
+            <p class="selection-title">Seleccione la ubicación</p>
+
+            {#if selectedLocation}
+              <p>Latitud: {selectedLocation[0].toFixed(6)}</p>
+              <p>Longitud: {selectedLocation[1].toFixed(6)}</p>
+              <button type="button" class="primary-button" onclick={confirmarUbicacion}>
+                Confirmar ubicación
+              </button>
+            {:else}
+              <p class="info-text">
+                Toca el mapa para colocar el pin de ubicación.
+              </p>
+            {/if}
+
+            <button
+              type="button"
+              class="secondary-button"
+              onclick={() => {
+                selectingLocation = false;
+                reportFormOpen = true;
+                selectedLocation = null;
+              }}
+            >
+              Volver al formulario
+            </button>
+          </div>
+        </div>
+      {/if}
     {:else}
       <div class="map-placeholder">Cargando mapa...</div>
     {/if}
   </div>
+
+  {#if reportFormOpen}
+    <ReportForm
+      currentLocation={tieneUbicacionReal ? posicionUsuario : null}
+      selectedLocation={selectedLocation}
+      on:close={cerrarFormularioReporte}
+      on:pickOnMap={activarSeleccionUbicacion}
+      on:submitReport={enviarReporte}
+    />
+  {/if}
 </div>

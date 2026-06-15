@@ -19,8 +19,6 @@
         <a href="/mapa">
             <div class="link">Mapa de Incendios</div>
         </a>
-        <div class="link">Lugares Seguros</div>
-        <div class="link">Alertas</div>
 
         {#if !page.data.isAuthenticated}
             <a href="/login">
