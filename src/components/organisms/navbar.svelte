@@ -19,6 +19,9 @@
         <a href="/mapa">
             <div class="link">Mapa de Incendios</div>
         </a>
+        <a href="/reportes">
+            <div class="link">Reportes</div>
+        </a>
 
         {#if !page.data.isAuthenticated}
             <a href="/login">
